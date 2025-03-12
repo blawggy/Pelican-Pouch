@@ -64,31 +64,32 @@ echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /et
 sudo apt-get update
 sudo apt-get install -y php8.3 php8.3-gd php8.3-mysql php8.3-mbstring php8.3-bcmath php8.3-xml php8.3-curl php8.3-zip php8.3-intl php8.3-sqlite3 php8.3-fpm
 sudo apt-get install -y curl git unzip tar
-
+clear
 # Create Pelican directory
 sudo mkdir -p /var/www/pelican
 cd /var/www/pelican
-
+clear
 # Install Pelican
 curl -L https://github.com/pelican-dev/panel/releases/latest/download/panel.tar.gz | sudo tar -xzv
-
+clear
 # Install Docker with Docker Compose Plugin
 curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
 echo "yes" | sudo composer install --no-dev --optimize-autoloader
-
+clear
 # Check if apache2 is installed
 if dpkg -l | grep -q apache2; then
     # Remove apache2 if installed
     sudo apt-get remove -y apache2
 fi
-
+clear
 # Install nginx
 sudo apt-get update
 sudo apt-get install -y nginx
-
+sleep 5 
+clear
 # Remove Default Nginx Configuration
 sudo rm /etc/nginx/sites-enabled/default
-
+clear
 if [ "$choice" == "ssl" ]; then
     sudo apt-get install -y certbot python3-certbot-nginx
     sudo certbot --nginx -d $domain
@@ -211,22 +212,56 @@ else
     echo "Invalid choice. Exiting."
     exit 1
 fi
-
+clear
 # Enable Configuration
 sudo ln -s /etc/nginx/sites-available/pelican.conf /etc/nginx/sites-enabled/pelican.conf
-
+clear
 # Restart Nginx
 sudo systemctl restart nginx
-
-# Panel Setup
+clear
+# Create .env file and generate key
 php artisan p:environment:setup
-
-# Create Admin User
-php artisan p:user:create
-
+clear
 # Setting permissions
 sudo chmod -R 755 storage/* bootstrap/cache/
 sudo chown -R www-data:www-data /var/www/pelican
+clear
+# Install Docker
+curl -sSL https://get.docker.com/ | CHANNEL=stable sudo sh
+sudo systemctl enable --now docker
+sleep 2
+clear
+# Installing Wings
+sudo mkdir -p /etc/pelican /var/run/wings
+sudo curl -L -o /usr/local/bin/wings "https://github.com/pelican-dev/wings/releases/latest/download/wings_linux_$([[ "$(uname -m)" == "x86_64" ]] && echo "amd64" || echo "arm64")"
+sudo chmod u+x /usr/local/bin/wings
+clear
+# Daemonize Wings
+cat <<EOF | sudo tee /etc/systemd/system/wings.service
+[Unit]
+Description=Wings Daemon
+After=docker.service
+Requires=docker.service
+PartOf=docker.service
+
+[Service]
+User=root
+WorkingDirectory=/etc/pelican
+LimitNOFILE=4096
+PIDFile=/var/run/wings/daemon.pid
+ExecStart=/usr/local/bin/wings
+Restart=on-failure
+StartLimitInterval=180
+StartLimitBurst=30
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+clear
+# Enable Wings Service
+sudo systemctl enable --now wings
+clear
 
 # Clear console and display success message alongside website URL
 clear
