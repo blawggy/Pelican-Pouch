@@ -2,8 +2,8 @@
 
 ## Dependencies
 
-- sudo
-- curl
+- Sudo
+- Curl
 
 ## Supported Systems:
 
@@ -21,3 +21,14 @@
 ```bash
 bash <(curl -s https://raw.githubusercontent.com/blawggy/Pelican-Dev-Installer/main/Pelican_Installer.sh)
 ```
+
+
+## Post install
+
+After running the install and following up with the **install guide**
+
+You Should be able to access the panel with the credentials
+
+Now you just need to configure the Node
+
+# Done
