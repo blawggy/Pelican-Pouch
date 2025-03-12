@@ -12,7 +12,7 @@
 | **Ubuntu**       | 20.04   | ⚠️︎       | **No SQLite Support**, Ubuntu 20.04 EoL is April 2025, not recommended |
 |                  | 22.04   | ✅︎       |        |
 |                  | **24.04** | ✅︎     | Documentation written assuming Ubuntu 24.04 as the base OS. |
-| **Rocky Linux**  | 9       | ✅︎       |        |
+| **Rocky Linux**  | 9       | ✅︎       |  Work In Progress     |
 | **Debian**       | 11      | ⚠️       | **No SQLite Support** |
 |                  | 12      | ✅︎       |        |
 
