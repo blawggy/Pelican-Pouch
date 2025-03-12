@@ -15,5 +15,5 @@
 ## Install Script
 
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/zZapp3r1/Pelican-Dev-Installer/Pelican_Installer.sh)
+bash <(curl -s https://raw.githubusercontent.com/zZapp3r1/Pelican-Dev-Installer/main/Pelican_Installer.sh)
 ```
