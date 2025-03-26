@@ -34,7 +34,6 @@ echo " "
 sleep 3
 clear
 
-
 # Check if script is being run as root
 if [ "$EUID" -ne 0 ]; then
     echo "Please run as root"
@@ -49,49 +48,79 @@ fi
 
 # Detect if package manager is yum or apt-get
 if command -v yum &> /dev/null; then
-    echo "yum"
+    PACKAGE_MANAGER="yum"
 elif command -v apt-get &> /dev/null; then
-    echo "apt-get"
+    PACKAGE_MANAGER="apt-get"
 else
     echo "Neither yum nor apt-get found"
     exit 1
 fi
 
 # Install php and required extensions
-sudo apt update && sudo apt install -y ca-certificates apt-transport-https software-properties-common wget
-wget -qO - https://packages.sury.org/php/apt.gpg | sudo tee /etc/apt/trusted.gpg.d/sury-php.gpg > /dev/null
-echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/sury-php.list
-sudo apt-get update
-sudo apt-get install -y php8.3 php8.3-gd php8.3-mysql php8.3-mbstring php8.3-bcmath php8.3-xml php8.3-curl php8.3-zip php8.3-intl php8.3-sqlite3 php8.3-fpm
-sudo apt-get install -y curl git unzip tar
+if [ "$PACKAGE_MANAGER" == "yum" ]; then
+    sudo yum install -y epel-release
+    sudo yum install -y https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+    sudo yum install -y yum-utils
+    sudo yum-config-manager --enable remi-php83
+    sudo yum install -y php php-gd php-mysql php-mbstring php-bcmath php-xml php-curl php-zip php-intl php-sqlite3 php-fpm
+    sudo yum install -y curl git unzip tar
+    sudo yum install -y nginx
+    sudo yum update -y
+elif [ "$PACKAGE_MANAGER" == "apt-get" ]; then
+    sudo apt update && sudo apt install -y ca-certificates apt-transport-https software-properties-common wget
+    wget -qO - https://packages.sury.org/php/apt.gpg | sudo tee /etc/apt/trusted.gpg.d/sury-php.gpg > /dev/null
+    echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/sury-php.list
+    sudo apt-get update
+    sudo apt-get install -y php8.3 php8.3-gd php8.3-mysql php8.3-mbstring php8.3-bcmath php8.3-xml php8.3-curl php8.3-zip php8.3-intl php8.3-sqlite3 php8.3-fpm
+    sudo apt-get install -y curl git unzip tar
+    sudo apt-get update
+    sudo apt-get install -y nginx
+else
+    echo "Neither yum nor apt-get found"
+    exit 1
+fi
 clear
+
 # Create Pelican directory
 sudo mkdir -p /var/www/pelican
 cd /var/www/pelican
 clear
+
 # Install Pelican
 curl -L https://github.com/pelican-dev/panel/releases/latest/download/panel.tar.gz | sudo tar -xzv
 clear
+
 # Install Docker with Docker Compose Plugin
 curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
 echo "yes" | sudo composer install --no-dev --optimize-autoloader
 clear
-# Check if apache2 is installed
-if dpkg -l | grep -q apache2; then
-    # Remove apache2 if installed
-    sudo apt-get remove -y apache2
+
+# Check if apache2 is installed and remove it
+if [ "$PACKAGE_MANAGER" == "yum" ]; then
+    if yum list installed "httpd" &> /dev/null; then
+        sudo yum remove -y httpd
+    fi
+elif [ "$PACKAGE_MANAGER" == "apt-get" ]; then
+    if dpkg -l | grep -q apache2; then
+        sudo apt-get remove -y apache2
+    fi
 fi
 clear
-# Install nginx
-sudo apt-get update
-sudo apt-get install -y nginx
+
 sleep 5 
 clear
+
 # Remove Default Nginx Configuration
 sudo rm /etc/nginx/sites-enabled/default
 clear
+
+# Install Certbot and configure SSL if chosen
 if [ "$choice" == "ssl" ]; then
-    sudo apt-get install -y certbot python3-certbot-nginx
+    if [ "$PACKAGE_MANAGER" == "yum" ]; then
+        sudo yum install -y certbot python3-certbot-nginx
+    elif [ "$PACKAGE_MANAGER" == "apt-get" ]; then
+        sudo apt-get install -y certbot python3-certbot-nginx
+    fi
     sudo certbot --nginx -d $domain
     cat <<EOF | sudo tee /etc/nginx/sites-available/pelican.conf
 server_tokens off;
@@ -213,29 +242,36 @@ else
     exit 1
 fi
 clear
+
 # Enable Configuration
 sudo ln -s /etc/nginx/sites-available/pelican.conf /etc/nginx/sites-enabled/pelican.conf
 clear
+
 # Restart Nginx
 sudo systemctl restart nginx
 clear
+
 # Create .env file and generate key
 php artisan p:environment:setup
 clear
+
 # Setting permissions
 sudo chmod -R 755 storage/* bootstrap/cache/
 sudo chown -R www-data:www-data /var/www/pelican
 clear
+
 # Install Docker
 curl -sSL https://get.docker.com/ | CHANNEL=stable sudo sh
 sudo systemctl enable --now docker
 sleep 2
 clear
+
 # Installing Wings
 sudo mkdir -p /etc/pelican /var/run/wings
 sudo curl -L -o /usr/local/bin/wings "https://github.com/pelican-dev/wings/releases/latest/download/wings_linux_$([[ "$(uname -m)" == "x86_64" ]] && echo "amd64" || echo "arm64")"
 sudo chmod u+x /usr/local/bin/wings
 clear
+
 # Daemonize Wings
 cat <<EOF | sudo tee /etc/systemd/system/wings.service
 [Unit]
@@ -259,6 +295,7 @@ RestartSec=5s
 WantedBy=multi-user.target
 EOF
 clear
+
 # Enable Wings Service
 sudo systemctl enable --now wings
 clear
