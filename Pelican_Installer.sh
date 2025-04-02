@@ -44,7 +44,7 @@ show_spinner() {
     local delay=0.1
     local spinstr
     if echo -e "\u280B" | grep -q "⠋"; then
-        spinstr='⠋⠙⠹⠸⠴⠦⠤⠄⠤⠄⠒' # Braille spinner
+        spinstr="⠋⠙⠹⠸⠴⠦⠤⠄⠤⠄⠒"  # Braille spinner
     else
         spinstr='|/-\' # ASCII spinner fallback
     fi
