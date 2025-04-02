@@ -52,7 +52,7 @@ else
     echo -e "\e[31mInvalid choice. Exiting.\e[0m"
     exit 1
 fi
-fi
+
 
 # Detect if package manager is yum or apt-get
 if command -v yum &> /dev/null; then
