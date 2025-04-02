@@ -343,4 +343,3 @@ if [ "$choice" == "ssl" ]; then
 elif [ "$choice" == "ip" ]; then
     echo "You can access your website at http://$ip/installer"
 fi
-------****
