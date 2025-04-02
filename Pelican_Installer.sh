@@ -43,8 +43,8 @@ show_spinner() {
     local pid=$1
     local delay=0.1
     local spinstr
-    if echo -e "\u280B" | grep -q "⠋"; then
-        spinstr="⠋⠙⠹⠸⠴⠦⠤⠄⠤⠄⠒"  # Braille spinner
+    if echo -e "\u280B" | grep -q "."; then
+        spinstr=".oO0"  # Braille spinner
     else
         spinstr='|/-\' # ASCII spinner fallback
     fi
