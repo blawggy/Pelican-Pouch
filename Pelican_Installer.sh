@@ -34,6 +34,21 @@ echo " "
 sleep 3
 clear
 
+# Function to show a spinner
+show_spinner() {
+    local pid=$1
+    local delay=0.1
+    local spinstr='|/-\'
+    while [ "$(ps -p $pid -o pid=)" ]; do
+        local temp=${spinstr#?}
+        printf " [%c]  " "$spinstr"
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+        printf "\b\b\b\b\b\b"
+    done
+    printf "    \b\b\b\b"
+}
+
 # Check if script is being run as root
 if [ "$EUID" -ne 0 ]; then
     echo "Please run as root"
@@ -53,7 +68,6 @@ else
     exit 1
 fi
 
-
 # Detect if package manager is yum or apt-get
 if command -v yum &> /dev/null; then
     PACKAGE_MANAGER="yum"
@@ -64,25 +78,26 @@ else
     exit 1
 fi
 
-# Install php and required extensions
+# Install PHP and required extensions
+echo "Installing PHP and required extensions..."
 if [ "$PACKAGE_MANAGER" == "yum" ]; then
-    sudo yum install -y epel-release
-    sudo yum install -y https://rpms.remirepo.net/enterprise/remi-release-7.rpm
-    sudo yum install -y yum-utils
-    sudo yum-config-manager --enable remi-php83
-    sudo yum install -y php php-gd php-mysql php-mbstring php-bcmath php-xml php-curl php-zip php-intl php-sqlite3 php-fpm
-    sudo yum install -y curl git unzip tar
-    sudo yum install -y nginx
-    sudo yum update -y
+    (sudo yum install -y epel-release > /dev/null 2>&1) & show_spinner $!
+    (sudo yum install -y https://rpms.remirepo.net/enterprise/remi-release-7.rpm > /dev/null 2>&1) & show_spinner $!
+    (sudo yum install -y yum-utils > /dev/null 2>&1) & show_spinner $!
+    (sudo yum-config-manager --enable remi-php83 > /dev/null 2>&1) & show_spinner $!
+    (sudo yum install -y php php-gd php-mysql php-mbstring php-bcmath php-xml php-curl php-zip php-intl php-sqlite3 php-fpm > /dev/null 2>&1) & show_spinner $!
+    (sudo yum install -y curl git unzip tar > /dev/null 2>&1) & show_spinner $!
+    (sudo yum install -y nginx > /dev/null 2>&1) & show_spinner $!
+    (sudo yum update -y > /dev/null 2>&1) & show_spinner $!
 elif [ "$PACKAGE_MANAGER" == "apt-get" ]; then
-    sudo apt update && sudo apt install -y ca-certificates apt-transport-https software-properties-common wget
-    wget -qO - https://packages.sury.org/php/apt.gpg | sudo tee /etc/apt/trusted.gpg.d/sury-php.gpg > /dev/null
-    echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/sury-php.list
-    sudo apt-get update
-    sudo apt-get install -y php8.3 php8.3-gd php8.3-mysql php8.3-mbstring php8.3-bcmath php8.3-xml php8.3-curl php8.3-zip php8.3-intl php8.3-sqlite3 php8.3-fpm
-    sudo apt-get install -y curl git unzip tar
-    sudo apt-get update
-    sudo apt-get install -y nginx
+    (sudo apt update > /dev/null 2>&1) & show_spinner $!
+    (sudo apt install -y ca-certificates apt-transport-https software-properties-common wget > /dev/null 2>&1) & show_spinner $!
+    (wget -qO - https://packages.sury.org/php/apt.gpg | sudo tee /etc/apt/trusted.gpg.d/sury-php.gpg > /dev/null 2>&1) & show_spinner $!
+    (echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/sury-php.list > /dev/null 2>&1) & show_spinner $!
+    (sudo apt-get update > /dev/null 2>&1) & show_spinner $!
+    (sudo apt-get install -y php8.3 php8.3-gd php8.3-mysql php8.3-mbstring php8.3-bcmath php8.3-xml php8.3-curl php8.3-zip php8.3-intl php8.3-sqlite3 php8.3-fpm > /dev/null 2>&1) & show_spinner $!
+    (sudo apt-get install -y curl git unzip tar > /dev/null 2>&1) & show_spinner $!
+    (sudo apt-get install -y nginx > /dev/null 2>&1) & show_spinner $!
 else
     echo "Neither yum nor apt-get found"
     exit 1
@@ -90,46 +105,45 @@ fi
 clear
 
 # Create Pelican directory
-sudo mkdir -p /var/www/pelican
-cd /var/www/pelican
+echo "Creating Pelican directory..."
+(sudo mkdir -p /var/www/pelican > /dev/null 2>&1) & show_spinner $!
+(cd /var/www/pelican > /dev/null 2>&1) & show_spinner $!
 clear
 
 # Install Pelican
-curl -L https://github.com/pelican-dev/panel/releases/latest/download/panel.tar.gz | sudo tar -xzv
+echo "Installing Pelican..."
+(curl -L https://github.com/pelican-dev/panel/releases/latest/download/panel.tar.gz | sudo tar -xzv > /dev/null 2>&1) & show_spinner $!
 clear
 
 # Install Docker with Docker Compose Plugin
-curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
-echo "yes" | sudo composer install --no-dev --optimize-autoloader
+echo "Installing Docker and Docker Compose Plugin..."
+(curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer > /dev/null 2>&1) & show_spinner $!
+(echo "yes" | sudo composer install --no-dev --optimize-autoloader > /dev/null 2>&1) & show_spinner $!
 clear
 
 # Check if apache2 is installed and remove it
+echo "Checking and removing Apache2 if installed..."
 if [ "$PACKAGE_MANAGER" == "yum" ]; then
-    if yum list installed "httpd" &> /dev/null; then
-        sudo yum remove -y httpd
-    fi
+    (yum list installed "httpd" &> /dev/null && sudo yum remove -y httpd > /dev/null 2>&1) & show_spinner $!
 elif [ "$PACKAGE_MANAGER" == "apt-get" ]; then
-    if dpkg -l | grep -q apache2; then
-        sudo apt-get remove -y apache2
-    fi
+    (dpkg -l | grep -q apache2 && sudo apt-get remove -y apache2 > /dev/null 2>&1) & show_spinner $!
 fi
 clear
 
-sleep 5 
-clear
-
 # Remove Default Nginx Configuration
-sudo rm /etc/nginx/sites-enabled/default
+echo "Removing default Nginx configuration..."
+(sudo rm /etc/nginx/sites-enabled/default > /dev/null 2>&1) & show_spinner $!
 clear
 
 # Install Certbot and configure SSL if chosen
 if [ "$choice" == "ssl" ]; then
+    echo "Installing Certbot and configuring SSL..."
     if [ "$PACKAGE_MANAGER" == "yum" ]; then
-        sudo yum install -y certbot python3-certbot-nginx
+        (sudo yum install -y certbot python3-certbot-nginx > /dev/null 2>&1) & show_spinner $!
     elif [ "$PACKAGE_MANAGER" == "apt-get" ]; then
-        sudo apt-get install -y certbot python3-certbot-nginx
+        (sudo apt-get install -y certbot python3-certbot-nginx > /dev/null 2>&1) & show_spinner $!
     fi
-    sudo certbot --nginx -d $domain
+    (sudo certbot --nginx -d $domain > /dev/null 2>&1) & show_spinner $!
     cat <<EOF | sudo tee /etc/nginx/sites-available/pelican.conf
 server_tokens off;
 
@@ -252,11 +266,13 @@ fi
 clear
 
 # Enable Configuration
-sudo ln -s /etc/nginx/sites-available/pelican.conf /etc/nginx/sites-enabled/pelican.conf
+echo "Enabling Nginx configuration..."
+(sudo ln -s /etc/nginx/sites-available/pelican.conf /etc/nginx/sites-enabled/pelican.conf > /dev/null 2>&1) & show_spinner $!
 clear
 
 # Restart Nginx
-sudo systemctl restart nginx
+echo "Restarting Nginx..."
+(sudo systemctl restart nginx > /dev/null 2>&1) & show_spinner $!
 clear
 
 # Create .env file and generate key
