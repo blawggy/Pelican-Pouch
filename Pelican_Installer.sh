@@ -285,6 +285,12 @@ echo "Restarting Nginx..."
 (sudo systemctl restart nginx > /dev/null 2>&1) & show_spinner $!
 clear
 
+# Install Docker
+curl -sSL https://get.docker.com/ | CHANNEL=stable sudo sh
+sudo systemctl enable --now docker
+sleep 2
+clear
+
 # Create .env file and generate key
 # Navigate to the Pelican directory and run the command
 cd /var/www/pelican
@@ -296,10 +302,9 @@ sudo chmod -R 755 storage/* bootstrap/cache/
 sudo chown -R www-data:www-data /var/www/pelican
 clear
 
-# Install Docker
-curl -sSL https://get.docker.com/ | CHANNEL=stable sudo sh
-sudo systemctl enable --now docker
-sleep 2
+# Restart Nginx
+echo "Restarting Nginx..."
+(sudo systemctl restart nginx > /dev/null 2>&1) & show_spinner $!
 clear
 
 # Installing Wings
@@ -310,7 +315,7 @@ clear
 
 # Daemonize Wings
 cat <<EOF | sudo tee /etc/systemd/system/wings.service
-[Unit]*
+[Unit]
 Description=Wings Daemon
 After=docker.service
 Requires=docker.service
