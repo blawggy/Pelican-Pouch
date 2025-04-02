@@ -29,7 +29,7 @@ bash <(curl -s https://raw.githubusercontent.com/blawggy/Pelican-Dev-Installer/m
 
 ## Post install
 
-After running the install and following up with the **install guide**
+After running the install, just click next all the way to the end. **NO COMMANDS NEEDED**
 
 You Should be able to access the panel with the credentials
 
