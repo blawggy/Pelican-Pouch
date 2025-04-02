@@ -16,6 +16,9 @@
 | **Debian**       | 11      | ⚠️       | **No SQLite Support** |
 |                  | 12      | ✅︎       |        |
 
+## Before running script
+> [!IMPORTANT] 
+> It is important that you have both Curl AND Sudo installed before running this script, as curl is needed to run the script and most sections use sudo
 ## Install Script
 
 ```bash
