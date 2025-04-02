@@ -15,14 +15,14 @@ sleep 2
 echo " "
 echo "Please make sure you have the following ready:"
 sleep 2
-echo "Fresh Debian server"
+echo "A Compatible server"
 sleep 2
 echo "Domain name pointing to this server's IP address"
 sleep 2
 echo "Installed sudo package"
 sleep 2
 echo " "
-echo "Red hat based systems are not supported by this script (Yet)"
+echo "Ensure that your dns records are configured correctly before running script"
 sleep 2
 echo " "
 echo "Installer developed by zptc"
@@ -41,9 +41,17 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Collect inputs at the beginning
+echo -e "\e[32mSSL and Domain\e[0m or \e[31mHTTP and IP\e[0m"
 read -p "Do you want to use SSL with a domain name or Use an ip address via HTTP? (ssl/ip): " choice
 if [ "$choice" == "ssl" ]; then
+    echo -e "\e[32mYou selected SSL with a domain name.\e[0m"
     read -p "Enter your domain name: " domain
+elif [ "$choice" == "ip" ]; then
+    echo -e "\e[31mYou selected HTTP with an IP address.\e[0m"
+else
+    echo -e "\e[31mInvalid choice. Exiting.\e[0m"
+    exit 1
+fi
 fi
 
 # Detect if package manager is yum or apt-get
