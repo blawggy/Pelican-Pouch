@@ -34,14 +34,17 @@ echo " "
 sleep 3
 clear
 
-# Function to show a spinner
+# Function to show a spinner with color
 show_spinner() {
     local pid=$1
     local delay=0.1
     local spinstr='⠋⠙⠹⠸⠴⠦⠤⠄⠤⠄⠒'
+    local color="\e[32m" # Green color
+    local reset="\e[0m"  # Reset color
+
     while [ "$(ps -p $pid -o pid=)" ]; do
         local temp=${spinstr#?}
-        printf " [%c]  " "$spinstr"
+        printf "${color} [%c]  ${reset}" "$spinstr"
         local spinstr=$temp${spinstr%"$temp"}
         sleep $delay
         printf "\b\b\b\b\b\b"
