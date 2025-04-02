@@ -38,7 +38,7 @@ clear
 show_spinner() {
     local pid=$1
     local delay=0.1
-    local spinstr='|/-\'
+    local spinstr='⠋⠙⠹⠸⠴⠦⠤⠄⠤⠄⠒'
     while [ "$(ps -p $pid -o pid=)" ]; do
         local temp=${spinstr#?}
         printf " [%c]  " "$spinstr"
@@ -264,7 +264,7 @@ else
     exit 1
 fi
 clear
-
+*
 # Enable Configuration
 echo "Enabling Nginx configuration..."
 (sudo ln -s /etc/nginx/sites-available/pelican.conf /etc/nginx/sites-enabled/pelican.conf > /dev/null 2>&1) & show_spinner $!
@@ -298,7 +298,7 @@ clear
 
 # Daemonize Wings
 cat <<EOF | sudo tee /etc/systemd/system/wings.service
-[Unit]
+[Unit]*
 Description=Wings Daemon
 After=docker.service
 Requires=docker.service
@@ -332,3 +332,4 @@ if [ "$choice" == "ssl" ]; then
 elif [ "$choice" == "ip" ]; then
     echo "You can access your website at http://$ip/installer"
 fi
+------****
