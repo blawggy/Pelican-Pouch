@@ -155,7 +155,7 @@ if [ "$choice" == "ssl" ]; then
         (sudo apt-get install -y certbot python3-certbot-nginx > /dev/null 2>&1) & show_spinner $!
     fi
     (sudo certbot --nginx -d $domain > /dev/null 2>&1) & show_spinner $!
-    sudo tee /etc/nginx/sites-available/pelican.conf > /dev/null <<EOF
+    cat <<EOF | sudo tee /etc/nginx/sites-available/pelican.conf
 server_tokens off;
 
 server {
@@ -224,7 +224,7 @@ server {
 EOF
 elif [ "$choice" == "ip" ]; then
     ip=$(hostname -I | awk '{print $1}')
-    sudo tee /etc/nginx/sites-available/pelican.conf > /dev/null <<EOF
+    cat <<EOF | sudo tee /etc/nginx/sites-available/pelican.conf
 server {
     listen 80;
     server_name $ip;
