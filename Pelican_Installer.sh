@@ -42,18 +42,22 @@ clear
 show_spinner() {
     local pid=$1
     local delay=0.1
-    local spinstr='⠋⠙⠹⠸⠴⠦⠤⠄⠤⠄⠒'
+    local spinstr
+    if echo -e "\u280B" | grep -q "⠋"; then
+        spinstr='⠋⠙⠹⠸⠴⠦⠤⠄⠤⠄⠒' # Braille spinner
+    else
+        spinstr='|/-\' # ASCII spinner fallback
+    fi
     local color="\e[32m" # Green color
     local reset="\e[0m"  # Reset color
 
     while [ "$(ps -p $pid -o pid=)" ]; do
         local temp=${spinstr#?}
-        printf "${color} [%c]  ${reset}" "$spinstr"
+        printf "${color} [%c]  ${reset}\r" "$spinstr"
         local spinstr=$temp${spinstr%"$temp"}
         sleep $delay
-        printf "\b\b\b\b\b\b"
     done
-    printf "    \b\b\b\b"
+    printf "    \r"
 }
 
 # Check if script is being run as root
