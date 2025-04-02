@@ -128,7 +128,7 @@ clear
 # Install Docker with Docker Compose Plugin
 echo "Installing Docker and Docker Compose Plugin..."
 (curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer > /dev/null 2>&1) & show_spinner $!
-(echo "yes" | sudo composer install --no-dev --optimize-autoloader > /dev/null 2>&1) & show_spinner $!
+(cd /var/www/pelican && echo "yes" | sudo composer install --no-dev --optimize-autoloader > /dev/null 2>&1) & show_spinner $!
 clear
 
 # Check if apache2 is installed and remove it
