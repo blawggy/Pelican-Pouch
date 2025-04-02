@@ -341,6 +341,14 @@ clear
 sudo systemctl enable --now wings
 clear
 
+# Automatically enter queue workers and crontab
+(crontab -l -u www-data 2>/dev/null; echo "* * * * * php /var/www/pelican/artisan schedule:run >> /dev/null 2>&1") | crontab -u www-data -
+
+sudo php /var/www/pelican/artisan p:environment:queue-service
+echo "pelican-queue"
+echo "www-data"
+echo "www-data"
+
 # Clear console and display success message alongside website URL
 clear
 echo "Pelican has been successfully installed."
