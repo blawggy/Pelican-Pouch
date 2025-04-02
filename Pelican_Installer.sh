@@ -90,7 +90,7 @@ else
 fi
 
 # Install PHP and required extensions
-echo "Installing PHP and required extensions..."
+echo "Installing PHP and required extensions"
 if [ "$PACKAGE_MANAGER" == "yum" ]; then
     (sudo yum install -y epel-release > /dev/null 2>&1) & show_spinner $!
     (sudo yum install -y https://rpms.remirepo.net/enterprise/remi-release-7.rpm > /dev/null 2>&1) & show_spinner $!
