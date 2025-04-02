@@ -286,6 +286,8 @@ echo "Restarting Nginx..."
 clear
 
 # Create .env file and generate key
+# Navigate to the Pelican directory and run the command
+cd /var/www/pelican
 php artisan p:environment:setup
 clear
 
