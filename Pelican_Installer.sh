@@ -118,12 +118,11 @@ clear
 # Create Pelican directory
 echo "Creating Pelican directory..."
 (sudo mkdir -p /var/www/pelican > /dev/null 2>&1) & show_spinner $!
-(cd /var/www/pelican > /dev/null 2>&1) & show_spinner $!
 clear
 
-# Install Pelican
+# Install Pelican inside the Pelican directory
 echo "Installing Pelican..."
-(curl -L https://github.com/pelican-dev/panel/releases/latest/download/panel.tar.gz | sudo tar -xzv > /dev/null 2>&1) & show_spinner $!
+(cd /var/www/pelican && curl -L https://github.com/pelican-dev/panel/releases/latest/download/panel.tar.gz | sudo tar -xzv > /dev/null 2>&1) & show_spinner $!
 clear
 
 # Install Docker with Docker Compose Plugin
