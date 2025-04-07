@@ -6,37 +6,47 @@ export LANG=en_US.UTF-8
 # Clear Console
 clear
 
-# Display Welcome Message
-echo "Welcome to Pelican Pouch"
-sleep 2
-echo " "
-echo "This script will install Pelican on your server"
-sleep 2
-echo " "
-echo "Please note that this script is meant for fresh installations only"
-sleep 2
-echo " "
-echo "Please make sure you have the following ready:"
-sleep 2
-echo "A Compatible server"
-sleep 2
-echo "Domain name pointing to this server's IP address"
-sleep 2
-echo "Installed sudo package"
-sleep 2
-echo " "
-echo "Ensure that your dns records are configured correctly before running script"
-sleep 2
-echo " "
-echo -e "Developed by \e[95m\e[1mzptc\e[0m"
-sleep 2
-echo " "
-echo -e "Pelican is owned by \e[94m\e[1mPelican Team\e[0m"
-sleep 2
-echo " "
-sleep 3
-clear
+# Check if the script is being run with the --skip-welcome argument
+SKIP_WELCOME=false
+for arg in "$@"; do
+    if [ "$arg" == "--skip-welcome" ]; then
+        SKIP_WELCOME=true
+        break
+    fi
+done
 
+# If the script is not run with the --skip-welcome argument, display the welcome message
+if [ "$SKIP_WELCOME" == false ]; then
+    # Display Welcome Message
+    echo "Welcome to Pelican Pouch"
+    sleep 2
+    echo " "
+    sleep 2
+    echo " "
+    echo "Please note that this script is meant for fresh installations only"
+    sleep 2
+    echo " "
+    echo "Please make sure you have the following ready:"
+    sleep 2
+    echo "A Compatible server"
+    sleep 2
+    echo "Domain name pointing to this server's IP address"
+    sleep 2
+    echo "Installed sudo package"
+    sleep 2
+    echo " "
+    echo "Ensure that your dns records are configured correctly before running script"
+    sleep 2
+    echo " "
+    echo -e "Developed by \e[95m\e[1mzptc\e[0m"
+    sleep 2
+    echo " "
+    echo -e "Pelican is owned by \e[94m\e[1mPelican Team\e[0m"
+    sleep 2
+    echo " "
+    sleep 3
+    clear
+fi
 # Function to show a spinner with color
 show_spinner() {
     local pid=$1
