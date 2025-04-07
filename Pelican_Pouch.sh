@@ -76,8 +76,8 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Collect inputs at the beginning
-echo -e "\e[32mSSL and Domain\e[0m, \e[31mHTTP and IP\e[0m, \e[34mInstall Wings\e[0m, or \e[35mUpdate Pelican\e[0m \e[30mUninstall Pelican\e[0m"
-read -p "Do you want to use SSL with a domain name, use an IP address via HTTP, install Wings, or update Pelican? (ssl/ip/wings/update): " choice
+echo -e "\e[32mSSL and Domain\e[0m, \e[33mHTTP and IP\e[0m, \e[34mInstall Wings\e[0m, or \e[35mUpdate Pelican\e[0m \e[31mUninstall Pelican\e[0m"
+read -p "Do you want to use SSL with a domain name, use an IP address via HTTP, install Wings, or update Pelican? (ssl/ip/wings/update/uninstall): " choice
 if [ "$choice" == "ssl" ]; then
     echo -e "\e[32mYou selected SSL with a domain name.\e[0m"
     read -p "Enter your domain name (or type 'local' for a local domain or '.tld' for an internal domain): " domain
