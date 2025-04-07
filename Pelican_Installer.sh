@@ -113,6 +113,7 @@ WantedBy=multi-user.target
 EOF
     sudo systemctl enable --now wings
     echo -e "\e[32mWings has been successfully installed and daemonized.\e[0m"
+    exit 0
 elif [ "$choice" == "update" ]; then
     echo -e "\e[35mYou selected to update Pelican.\e[0m"
     cd /var/www/pelican
