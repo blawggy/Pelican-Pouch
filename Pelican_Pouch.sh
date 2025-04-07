@@ -265,8 +265,8 @@ if [ "$choice" == "ssl" ]; then
         }
 EOF
     else 
-    (sudo certbot --nginx -d $domain > /dev/null 2>&1) & show_spinner $!
-    cat <<EOF | sudo tee /etc/nginx/sites-available/pelican.conf
+        (sudo certbot --nginx -d $domain > /dev/null 2>&1) & show_spinner $!
+        cat <<EOF | sudo tee /etc/nginx/sites-available/pelican.conf
 server_tokens off;
 
 server {
