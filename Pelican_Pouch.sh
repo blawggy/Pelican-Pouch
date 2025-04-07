@@ -28,10 +28,10 @@ echo " "
 echo "Ensure that your dns records are configured correctly before running script"
 sleep 2
 echo " "
-echo "Developed by zptc"
+echo -e "Developed by \e[95m**zptc**\e[0m"
 sleep 2
 echo " "
-echo "Pelican is owned by Pelican Team"
+echo -e "Pelican is owned by \e[94m\e[1mPelican Team\e[0m"
 sleep 2
 echo " "
 sleep 3
