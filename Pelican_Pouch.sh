@@ -28,7 +28,7 @@ echo " "
 echo "Ensure that your dns records are configured correctly before running script"
 sleep 2
 echo " "
-echo -e "Developed by \e[95m\e[1mzptc]\e[0m"
+echo -e "Developed by \e[95m\e[1mzptc\e[0m"
 sleep 2
 echo " "
 echo -e "Pelican is owned by \e[94m\e[1mPelican Team\e[0m"
