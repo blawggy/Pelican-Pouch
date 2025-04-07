@@ -76,7 +76,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Collect inputs at the beginning
-echo -e "\e[32mSSL and Domain\e[0m, \e[31mHTTP and IP\e[0m, \e[34mInstall Wings\e[0m, or \e[35mUpdate Pelican\e[0m"
+echo -e "\e[32mSSL and Domain\e[0m, \e[31mHTTP and IP\e[0m, \e[34mInstall Wings\e[0m, or \e[35mUpdate Pelican\e[0m \e[30mUninstall Pelican\e[0m"
 read -p "Do you want to use SSL with a domain name, use an IP address via HTTP, install Wings, or update Pelican? (ssl/ip/wings/update): " choice
 if [ "$choice" == "ssl" ]; then
     echo -e "\e[32mYou selected SSL with a domain name.\e[0m"
@@ -140,6 +140,25 @@ elif [ "$choice" == "update" ]; then
     (sudo php artisan up > /dev/null 2>&1) & show_spinner $!
     echo -e "\e[32mPelican has been successfully updated.\e[0m"
     exit 0
+elif [ "$choice" == "uninstall" ]; then
+    echo -e "\e[35mYou selected to uninstall Pelican.\e[0m"
+    read -p "Are you sure you want to uninstall Pelican? (y/n): " confirm
+    if [ "$confirm" == "y" ]; then
+        echo "Uninstalling Pelican..."
+        (sudo rm -rf /var/www/pelican > /dev/null 2>&1) & show_spinner $!
+        (sudo rm -f /etc/nginx/sites-available/pelican.conf > /dev/null 2>&1) & show_spinner $!
+        (sudo rm -f /etc/nginx/sites-enabled/pelican.conf > /dev/null 2>&1) & show_spinner $!
+        (sudo systemctl restart nginx > /dev/null 2>&1) & show_spinner $!
+        (systemctl disable --now pelican-queue > /dev/null 2>&1) & show_spinner $!
+        (sudo sudo rm /etc/systemd/system/pelican-queue.service > /dev/null 2>&1) & show_spinner $!
+        (mysql -u root -p -e "DROP DATABASE IF EXISTS pelican; DROP USER IF EXISTS 'pelican'@'localhost';" > /dev/null 2>&1) & show_spinner $!
+        (sudo rm -rf /var/lib/pelican > /dev/null 2>&1) & show_spinner $!
+        echo -e "\e[32mPelican has been successfully uninstalled.\e[0m"
+        exit 0
+    else
+        echo -e "\e[31mUninstallation canceled.\e[0m"
+        exit 0
+    fi
 else
     echo -e "\e[31mInvalid choice. Exiting.\e[0m"
     exit 1
