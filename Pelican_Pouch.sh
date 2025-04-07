@@ -7,7 +7,7 @@ export LANG=en_US.UTF-8
 clear
 
 # Display Welcome Message
-echo "Welcome to Pelican installer"
+echo "Welcome to Pelican Pouch"
 sleep 2
 echo " "
 echo "This script will install Pelican on your server"
