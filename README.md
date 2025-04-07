@@ -1,4 +1,6 @@
-# Pelican.dev Installer
+# Pelican Pouch
+
+# An all-in-one Script for Pelican Panel 
 
 ## Dependencies
 
