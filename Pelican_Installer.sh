@@ -66,13 +66,69 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Collect inputs at the beginning
-echo -e "\e[32mSSL and Domain\e[0m or \e[31mHTTP and IP\e[0m"
-read -p "Do you want to use SSL with a domain name or Use an ip address via HTTP? (ssl/ip): " choice
+echo -e "\e[32mSSL and Domain\e[0m, \e[31mHTTP and IP\e[0m, \e[34mInstall Wings\e[0m, or \e[35mUpdate Pelican\e[0m"
+read -p "Do you want to use SSL with a domain name, use an IP address via HTTP, install Wings, or update Pelican? (ssl/ip/wings/update): " choice
 if [ "$choice" == "ssl" ]; then
     echo -e "\e[32mYou selected SSL with a domain name.\e[0m"
-    read -p "Enter your domain name: " domain
+    read -p "Enter your domain name (or type 'local' for a local domain or '.tld' for an internal domain): " domain
+    if [ "$domain" == "local" ]; then
+        domain="localhost"
+        echo -e "\e[33mUsing 'localhost' as the domain name for local setup.\e[0m"
+    elif [[ "$domain" == *".local" ]]; then
+        echo -e "\e[33mUsing '$domain' as the internal domain name.\e[0m"
+        
+    fi
 elif [ "$choice" == "ip" ]; then
     echo -e "\e[31mYou selected HTTP with an IP address.\e[0m"
+elif [ "$choice" == "wings" ]; then
+    echo -e "\e[34mYou selected to install Wings.\e[0m"
+    echo "Installing Docker..."
+    curl -sSL https://get.docker.com/ | CHANNEL=stable sudo sh
+    sudo systemctl enable --now docker
+    echo "Installing Wings..."
+    sudo mkdir -p /etc/pelican /var/run/wings
+    sudo curl -L -o /usr/local/bin/wings "https://github.com/pelican-dev/wings/releases/latest/download/wings_linux_$([[ "$(uname -m)" == "x86_64" ]] && echo "amd64" || echo "arm64")"
+    sudo chmod u+x /usr/local/bin/wings
+    echo "Daemonizing Wings..."
+    cat <<EOF | sudo tee /etc/systemd/system/wings.service
+[Unit]
+Description=Wings Daemon
+After=docker.service
+Requires=docker.service
+PartOf=docker.service
+
+[Service]
+User=root
+WorkingDirectory=/etc/pelican
+LimitNOFILE=4096
+PIDFile=/var/run/wings/daemon.pid
+ExecStart=/usr/local/bin/wings
+Restart=on-failure
+StartLimitInterval=180
+StartLimitBurst=30
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    sudo systemctl enable --now wings
+    echo -e "\e[32mWings has been successfully installed and daemonized.\e[0m"
+elif [ "$choice" == "update" ]; then
+    echo -e "\e[35mYou selected to update Pelican.\e[0m"
+    cd /var/www/pelican
+    php artisan down
+    echo "Updating Pelican..."
+    (sudo curl -L https://github.com/pelican-dev/panel/releases/latest/download/panel.tar.gz | sudo tar -xzv > /dev/null 2>&1) & show_spinner $!
+    (sudo chmod -R 755 storage/* bootstrap/cache > /dev/null 2>&1) & show_spinner $!
+    (sudo COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader > /dev/null 2>&1) & show_spinner $!
+    (php artisan view:clear && php artisan config:clear > /dev/null 2>&1) & show_spinner $!
+    (php artisan filament:optimize > /dev/null 2>&1) & show_spinner $!
+    (php artisan migrate --seed --force > /dev/null 2>&1) & show_spinner $!
+    (sudo chown -R www-data:www-data /var/www/pelican > /dev/null 2>&1) & show_spinner $!
+    (php artisan queue:restart > /dev/null 2>&1) & show_spinner $!
+    (sudo php artisan up > /dev/null 2>&1) & show_spinner $!
+    echo -e "\e[32mPelican has been successfully updated.\e[0m"
+    exit 0
 else
     echo -e "\e[31mInvalid choice. Exiting.\e[0m"
     exit 1
@@ -125,7 +181,7 @@ echo "Installing Pelican..."
 clear
 
 # Install Docker with Docker Compose Plugin
-echo "Installing Docker and Docker Compose Plugin..."
+echo "Installing Composer..."
 (curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer > /dev/null 2>&1) & show_spinner $!
 (cd /var/www/pelican && echo "yes" | sudo composer install --no-dev --optimize-autoloader > /dev/null 2>&1) & show_spinner $!
 clear
@@ -343,10 +399,7 @@ clear
 # Automatically enter queue workers and crontab
 (crontab -l -u www-data 2>/dev/null; echo "* * * * * php /var/www/pelican/artisan schedule:run >> /dev/null 2>&1") | crontab -u www-data -
 
-sudo php /var/www/pelican/artisan p:environment:queue-service
-echo "pelican-queue"
-echo "www-data"
-echo "www-data"
+echo -e "pelican-queue\nwww-data\nwww-data" | sudo php /var/www/pelican/artisan p:environment:queue-service
 
 # Clear console and display success message alongside website URL
 clear
