@@ -28,7 +28,7 @@ echo " "
 echo "Ensure that your dns records are configured correctly before running script"
 sleep 2
 echo " "
-echo "Installer developed by zptc"
+echo "Developed by zptc"
 sleep 2
 echo " "
 echo "Pelican is owned by Pelican Team"
