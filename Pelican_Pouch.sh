@@ -264,13 +264,7 @@ if [ "$choice" == "ssl" ]; then
             }
         }
 EOF
-
-    fi
-    if [ "$PACKAGE_MANAGER" == "yum" ]; then
-        (sudo yum install -y certbot python3-certbot-nginx > /dev/null 2>&1) & show_spinner $!
-    elif [ "$PACKAGE_MANAGER" == "apt-get" ]; then
-        (sudo apt-get install -y certbot python3-certbot-nginx > /dev/null 2>&1) & show_spinner $!
-    fi
+    else 
     (sudo certbot --nginx -d $domain > /dev/null 2>&1) & show_spinner $!
     cat <<EOF | sudo tee /etc/nginx/sites-available/pelican.conf
 server_tokens off;
@@ -339,6 +333,14 @@ server {
     }
 }
 EOF
+
+    fi
+    if [ "$PACKAGE_MANAGER" == "yum" ]; then
+        (sudo yum install -y certbot python3-certbot-nginx > /dev/null 2>&1) & show_spinner $!
+    elif [ "$PACKAGE_MANAGER" == "apt-get" ]; then
+        (sudo apt-get install -y certbot python3-certbot-nginx > /dev/null 2>&1) & show_spinner $!
+    fi
+    
 elif [ "$choice" == "ip" ]; then
     ip=$(hostname -I | awk '{print $1}')
     cat <<EOF | sudo tee /etc/nginx/sites-available/pelican.conf
