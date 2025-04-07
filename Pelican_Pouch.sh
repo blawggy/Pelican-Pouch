@@ -90,6 +90,15 @@ if [ "$choice" == "ssl" ]; then
     fi
 elif [ "$choice" == "ip" ]; then
     echo -e "\e[31mYou selected HTTP with an IP address.\e[0m"
+    read -p "Do you want to use a static IP? (y/n): " static_ip_choice
+    if [ "$static_ip_choice" == "y" ]; then
+        read -p "Enter the static IP address: " static_ip
+        ip=$static_ip
+        echo -e "\e[32mUsing static IP: $ip\e[0m"
+    else
+        ip=$(hostname -I | awk '{print $1}')
+        echo -e "\e[33mUsing detected IP: $ip\e[0m"
+    fi
 elif [ "$choice" == "wings" ]; then
     echo -e "\e[34mYou selected to install Wings.\e[0m"
     echo "Installing Docker..."
