@@ -189,7 +189,7 @@ if [ "$PACKAGE_MANAGER" == "yum" ]; then
     (sudo yum install -y epel-release > /dev/null 2>&1) & show_spinner $!
     (sudo yum install -y https://rpms.remirepo.net/enterprise/remi-release-7.rpm > /dev/null 2>&1) & show_spinner $!
     (sudo yum install -y yum-utils > /dev/null 2>&1) & show_spinner $!
-    (sudo yum-config-manager --enable remi-php83 > /dev/null 2>&1) & show_spinner $!
+    (sudo yum-config-manager --enable remi-php84 > /dev/null 2>&1) & show_spinner $!
     (sudo yum install -y php php-gd php-mysql php-mbstring php-bcmath php-xml php-curl php-zip php-intl php-sqlite3 php-fpm > /dev/null 2>&1) & show_spinner $!
     (sudo yum install -y curl git unzip tar > /dev/null 2>&1) & show_spinner $!
     (sudo yum install -y nginx > /dev/null 2>&1) & show_spinner $!
@@ -200,7 +200,7 @@ elif [ "$PACKAGE_MANAGER" == "apt-get" ]; then
     (wget -qO - https://packages.sury.org/php/apt.gpg | sudo tee /etc/apt/trusted.gpg.d/sury-php.gpg > /dev/null 2>&1) & show_spinner $!
     (echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/sury-php.list > /dev/null 2>&1) & show_spinner $!
     (sudo apt-get update > /dev/null 2>&1) & show_spinner $!
-    (sudo apt-get install -y php8.3 php8.3-gd php8.3-mysql php8.3-mbstring php8.3-bcmath php8.3-xml php8.3-curl php8.3-zip php8.3-intl php8.3-sqlite3 php8.3-fpm > /dev/null 2>&1) & show_spinner $!
+    (sudo apt-get install -y php8.4 php8.4-gd php8.4-mysql php8.4-mbstring php8.4-bcmath php8.4-xml php8.4-curl php8.4-zip php8.4-intl php8.4-sqlite3 php8.4-fpm > /dev/null 2>&1) & show_spinner $!
     (sudo apt-get install -y curl git unzip tar > /dev/null 2>&1) & show_spinner $!
     (sudo apt-get install -y nginx > /dev/null 2>&1) & show_spinner $!
 else
@@ -341,7 +341,7 @@ server {
 
     location ~ \.php$ {
         fastcgi_split_path_info ^(.+\.php)(/.+)$;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_pass unix:/run/php/php8.4-fpm.sock;
         fastcgi_index index.php;
         include fastcgi_params;
         fastcgi_param PHP_VALUE "upload_max_filesize = 100M \n post_max_size=100M";
@@ -398,7 +398,7 @@ server {
 
     location ~ \.php$ {
         fastcgi_split_path_info ^(.+\.php)(/.+)$;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_pass unix:/run/php/php8.4-fpm.sock;
         fastcgi_index index.php;
         include fastcgi_params;
         fastcgi_param PHP_VALUE "upload_max_filesize = 100M \n post_max_size=100M";
