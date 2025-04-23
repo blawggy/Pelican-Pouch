@@ -12,11 +12,11 @@
 | Operating System |  Version  | Supported |                                 Notes                                  |
 | :--------------: | :-------: | :-------: | :--------------------------------------------------------------------: |
 |    **Ubuntu**    |   20.04   |    ⚠️︎    | **No SQLite Support**, Ubuntu 20.04 EoL is April 2025, not recommended |
-|                  |   22.04   |    ✅︎     |                                                                        |
-|                  | **24.04** |    ✅︎     |      Documentation written assuming Ubuntu 24.04 as the base OS.       |
+|                  |   22.04   |    ⚠️     |                                                                        |
+|                  | **24.04** |    ⚠️    |      Some parts require manual setup. look after official documentation       |
 | **Rocky Linux**  |     9     |    ✅︎     |                                                                        |
 |    **Debian**    |    11     |    ⚠️     |                         **No SQLite Support**                          |
-|                  |    12     |    ✅︎     |                                                                        |
+|                  |    12     |    ✅     |       Documentation written assuming Debian 12 as the base OS        |
 
 ## Before running script
 > [!IMPORTANT] 
