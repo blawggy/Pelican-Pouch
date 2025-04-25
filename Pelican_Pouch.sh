@@ -77,17 +77,19 @@ show_spinner() {
     local spinstr
     export LANG=en_US.UTF-8  # Ensure UTF-8 encoding
     if printf "\u280B" | grep -q "."; then
-        spinstr='◜◞◝◠◡◡◠◝◞◜'  # Fancy spinner
+        spinstr='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'  # Docker-style Braille spinner
     else
         spinstr='|/-\' # ASCII spinner fallback
     fi
-    local color="\e[32m" # Green color
+    local colors=("\e[32m" "\e[37m") # Green and White colors
     local reset="\e[0m"  # Reset color
+    local color_index=0
 
     while [ "$(ps -p $pid -o pid=)" ]; do
         local temp=${spinstr#?}
-        printf "${color} [%s]  ${reset}\r" "${spinstr:0:1}"
+        printf "${colors[color_index]} [%s]  ${reset}\r" "${spinstr:0:1}"
         spinstr=$temp${spinstr%"$temp"}
+        color_index=$((1 - color_index)) # Toggle between 0 and 1
         sleep $delay
     done
     printf "    \r"
