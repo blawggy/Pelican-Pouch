@@ -15,6 +15,34 @@ for arg in "$@"; do
     fi
 done
 
+# Parse command-line arguments and set the corresponding choice
+for ((i = 1; i <= $#; i++)); do
+    case "${!i}" in
+        -d)
+            choice="ssl"
+            ((i++))
+            domain="${!i}"
+            ;;
+        -i)
+            choice="ip"
+            ((i++))
+            ip="${!i}"
+            ;;
+        -w)
+            choice="wings"
+            ;;
+        -u)
+            choice="update"
+            ;;
+        -x)
+            choice="uninstall"
+            ;;
+        *)
+            ;;
+    esac
+done
+
+
 # If the script is not run with the --skip-welcome argument, display the welcome message
 if [ "$SKIP_WELCOME" == false ]; then
     # Display Welcome Message
@@ -30,12 +58,7 @@ if [ "$SKIP_WELCOME" == false ]; then
     sleep 2
     echo "A Compatible server"
     sleep 2
-    echo "Domain name pointing to this server's IP address"
-    sleep 2
     echo "Installed sudo package"
-    sleep 2
-    echo " "
-    echo "Ensure that your dns records are configured correctly before running script"
     sleep 2
     echo " "
     echo -e "Developed by \e[95m\e[1mzptc\e[0m"
@@ -53,7 +76,7 @@ show_spinner() {
     local delay=0.1
     local spinstr
     if echo -e "\u280B" | grep -q "."; then
-        spinstr=".oO0"  # Braille spinner
+        spinstr=("◜" "◞" "◝" "◠" "◡" "◡" "◠" "◝" "◞" "◜")  # Fancy spinner
     else
         spinstr='|/-\' # ASCII spinner fallback
     fi
@@ -107,7 +130,8 @@ elif [ "$choice" == "wings" ]; then
     echo "Installing Wings..."
     sudo mkdir -p /etc/pelican /var/run/wings
     sudo curl -L -o /usr/local/bin/wings "https://github.com/pelican-dev/wings/releases/latest/download/wings_linux_$([[ "$(uname -m)" == "x86_64" ]] && echo "amd64" || echo "arm64")"
-    sudo chmod u+x /usr/local/bin/wings
+    sudo chmod u+x /us
+    r/local/bin/wings
     echo "Daemonizing Wings..."
     cat <<EOF | sudo tee /etc/systemd/system/wings.service
 [Unit]
@@ -167,6 +191,11 @@ elif [ "$choice" == "uninstall" ]; then
     else
         echo -e "\e[31mUninstallation canceled.\e[0m"
         exit 0
+    fi
+elif [ "$choice" == "renew"] then
+    certbot --nginx -d $domain
+    echo -e "\e[32mCertificate has been successfully renewed.\e[0m"
+    exit 0    
     fi
 else
     echo -e "\e[31mInvalid choice. Exiting.\e[0m"
