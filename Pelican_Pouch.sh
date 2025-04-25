@@ -77,7 +77,7 @@ show_spinner() {
     local spinstr
     export LANG=en_US.UTF-8  # Ensure UTF-8 encoding
     if echo -e "\u280B" | grep -q "."; then
-        spinstr=("◜" "◞" "◝" "◠" "◡" "◡" "◠" "◝" "◞" "◜")  # Fancy spinner
+        spinstr='◜◞◝◠◡◡◠◝◞◜'  # Fancy spinner
     else
         spinstr='|/-\' # ASCII spinner fallback
     fi
