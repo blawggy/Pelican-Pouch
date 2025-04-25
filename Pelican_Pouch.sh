@@ -76,7 +76,7 @@ show_spinner() {
     local delay=0.1
     local spinstr
     export LANG=en_US.UTF-8  # Ensure UTF-8 encoding
-    if echo -e "\u280B" | grep -q "."; then
+    if printf "\u280B" | grep -q "."; then
         spinstr='◜◞◝◠◡◡◠◝◞◜'  # Fancy spinner
     else
         spinstr='|/-\' # ASCII spinner fallback
@@ -86,11 +86,11 @@ show_spinner() {
 
     while [ "$(ps -p $pid -o pid=)" ]; do
         local temp=${spinstr#?}
-        echo -ne "${color} [${spinstr:0:1}]  ${reset}\r"
+        printf "${color} [%s]  ${reset}\r" "${spinstr:0:1}"
         spinstr=$temp${spinstr%"$temp"}
         sleep $delay
     done
-    echo -ne "    \r"
+    printf "    \r"
 }
 
 # Check if script is being run as root
