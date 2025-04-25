@@ -73,7 +73,7 @@ fi
 # Function to show a spinner with color
 show_spinner() {
     local pid=$1
-    local delay=0.1
+    local delay=0.025
     local spinstr
     export LANG=en_US.UTF-8  # Ensure UTF-8 encoding
     if printf "\u280B" | grep -q "."; then
@@ -87,7 +87,7 @@ show_spinner() {
 
     while [ "$(ps -p $pid -o pid=)" ]; do
         local temp=${spinstr#?}
-        printf "${colors[color_index]} [%s]  ${reset}\r" "${spinstr:0:1}"
+        printf "${colors[color_index]} [ %s ]  ${reset}\r" "${spinstr:0:1}"
         spinstr=$temp${spinstr%"$temp"}
         color_index=$((1 - color_index)) # Toggle between 0 and 1
         sleep $delay
