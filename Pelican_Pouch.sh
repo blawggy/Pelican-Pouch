@@ -128,7 +128,8 @@ elif [ "$choice" == "ip" ]; then
 elif [ "$choice" == "wings" ]; then
     echo -e "\e[34mYou selected to install Wings.\e[0m"
     echo "Installing Docker..."
-    curl -sSL https://get.docker.com/ | CHANNEL=stable sudo sh
+    apt install -y docker.io docker-compose-plugin docker-ce docker-ce-cli > /dev/null 2>&1
+    systemctl start docker
     sudo systemctl enable --now docker
     echo "Installing Wings..."
     sudo mkdir -p /etc/pelican /var/run/wings
@@ -466,7 +467,8 @@ echo "Restarting Nginx..."
 clear
 
 # Install Docker
-curl -sSL https://get.docker.com/ | CHANNEL=stable sudo sh
+echo "Installing Docker..."
+(sudo apt install -y docker.io docker-compose-plugin docker-ce docker-ce-cli > /dev/null 2>&1 ) & show_spinner $!
 sudo systemctl enable --now docker
 sleep 2
 clear
@@ -488,8 +490,9 @@ echo "Restarting Nginx..."
 clear
 
 # Installing Wings
+echo "Installing Wings..."
 sudo mkdir -p /etc/pelican /var/run/wings
-sudo curl -L -o /usr/local/bin/wings "https://github.com/pelican-dev/wings/releases/latest/download/wings_linux_$([[ "$(uname -m)" == "x86_64" ]] && echo "amd64" || echo "arm64")"
+(sudo curl -L -o /usr/local/bin/wings "https://github.com/pelican-dev/wings/releases/latest/download/wings_linux_$([[ "$(uname -m)" == "x86_64" ]] && echo "amd64" || echo "arm64")" > /dev/null 2>&1) & show_spinner $!
 sudo chmod u+x /usr/local/bin/wings
 clear
 
@@ -523,7 +526,6 @@ clear
 
 # Automatically enter queue workers and crontab
 (crontab -l -u www-data 2>/dev/null; echo "* * * * * php /var/www/pelican/artisan schedule:run >> /dev/null 2>&1") | crontab -u www-data -
-
 echo -e "pelican-queue\nwww-data\nwww-data" | sudo php /var/www/pelican/artisan p:environment:queue-service
 
 # Clear console and display success message alongside website URL
