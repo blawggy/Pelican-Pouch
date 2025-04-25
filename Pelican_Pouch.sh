@@ -87,7 +87,7 @@ show_spinner() {
     while [ "$(ps -p $pid -o pid=)" ]; do
         local temp=${spinstr#?}
         echo -ne "${color} [${spinstr:0:1}]  ${reset}\r"
-        local spinstr=$temp${spinstr%"$temp"}
+        spinstr=$temp${spinstr%"$temp"}
         sleep $delay
     done
     echo -ne "    \r"
