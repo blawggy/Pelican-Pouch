@@ -192,7 +192,7 @@ elif [ "$choice" == "uninstall" ]; then
         echo -e "\e[31mUninstallation canceled.\e[0m"
         exit 0
     fi
-elif [ "$choice" == "renew"]; then
+elif [ "$choice" == "renew" ]; then
     certbot --nginx -d $domain
     echo -e "\e[32mCertificate has been successfully renewed.\e[0m"
     exit 0    
