@@ -87,7 +87,7 @@ show_spinner() {
 
     while [ "$(ps -p $pid -o pid=)" ]; do
         local temp=${spinstr#?}
-        printf "${colors[color_index]} [ %s ]  ${reset}\r" "${spinstr:0:1}"
+        printf "${colors[color_index]} %s  ${reset}\r" "${spinstr:0:1}"
         spinstr=$temp${spinstr%"$temp"}
         color_index=$((1 - color_index)) # Toggle between 0 and 1
         sleep $delay
@@ -468,6 +468,14 @@ clear
 
 # Install Docker
 echo "Installing Docker..."
+# Add Docker's official GPG key
+curl -fsSL https://download.docker.com/linux/$(. /etc/os-release && echo "$ID")/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+# Set up the stable repository
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/$(. /etc/os-release && echo "$ID") $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Update package index
+sudo apt-get update
 (sudo apt install -y docker.io docker-compose-plugin docker-ce docker-ce-cli > /dev/null 2>&1 ) & show_spinner $!
 sudo systemctl enable --now docker
 sleep 2
