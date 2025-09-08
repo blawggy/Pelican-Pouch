@@ -102,6 +102,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Collect inputs at the beginning
+sudo apt install -y gpg  > /dev/null 2>&1
 echo -e "\e[32mSSL and Domain\e[0m, \e[33mHTTP and IP\e[0m, \e[34mInstall Wings\e[0m, or \e[35mUpdate Pelican\e[0m \e[31mUninstall Pelican\e[0m"
 read -p "Do you want to use SSL with a domain name, use an IP address via HTTP, install Wings, update Pelican or uninstall Pelican? (ssl/ip/wings/update/uninstall): " choice
 if [ "$choice" == "ssl" ]; then
