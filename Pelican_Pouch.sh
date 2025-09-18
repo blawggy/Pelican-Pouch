@@ -4,7 +4,7 @@
 export LANG=en_US.UTF-8
 
 # Install Dependencies if user doesnt have them installed
-sudo apt install wget curl git tar unzip -y
+sudo apt install wget curl git tar unzip lsb-release gnupg2  -y
 
 
 # Clear Console
