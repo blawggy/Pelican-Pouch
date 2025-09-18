@@ -173,8 +173,8 @@ fi
 # Detect if package manager is yum or apt-get
 if command -v yum &> /dev/null; then
     PACKAGE_MANAGER="yum"
-elif command -v apt-get &> /dev/null; then
-    PACKAGE_MANAGER="apt-get"
+elif command -v apt &> /dev/null; then
+    PACKAGE_MANAGER="apt"
 else
     echo "Neither yum nor apt-get found"
     exit 1
@@ -191,7 +191,7 @@ if [ "$PACKAGE_MANAGER" == "yum" ]; then
     (sudo yum install -y curl git unzip tar > /dev/null 2>&1) & show_spinner $!
     (sudo yum install -y nginx > /dev/null 2>&1) & show_spinner $!
     (sudo yum update -y > /dev/null 2>&1) & show_spinner $!
-elif [ "$PACKAGE_MANAGER" == "apt-get" ]; then
+elif [ "$PACKAGE_MANAGER" == "apt" ]; then
     (sudo apt update > /dev/null 2>&1) & show_spinner $!
     (sudo apt install -y ca-certificates apt-transport-https software-properties-common wget > /dev/null 2>&1) & show_spinner $!
     (wget -qO - https://packages.sury.org/php/apt.gpg | sudo tee /etc/apt/trusted.gpg.d/sury-php.gpg > /dev/null 2>&1) & show_spinner $!
