@@ -231,12 +231,11 @@ if [ "$PACKAGE_MANAGER" == "yum" ]; then
 elif [ "$PACKAGE_MANAGER" == "apt-get" ]; then
     (dpkg -l | grep -q apache2 && sudo apt-get remove -y apache2 > /dev/null 2>&1) & show_spinner $!
 fi
-clear
+
 
 # Remove Default Nginx Configuration
 echo "Removing default Nginx configuration..."
 (sudo rm /etc/nginx/sites-enabled/default > /dev/null 2>&1) & show_spinner $!
-clear
 
 # Install Certbot and configure SSL if chosen
 if [ "$choice" == "ssl" ]; then
@@ -420,32 +419,24 @@ else
     echo "Invalid choice. Exiting."
     exit 1
 fi
-clear
+
 
 # Enable Configuration
 echo "Enabling Nginx configuration..."
 (sudo ln -s /etc/nginx/sites-available/pelican.conf /etc/nginx/sites-enabled/pelican.conf > /dev/null 2>&1) & show_spinner $!
-clear
+
 
 # Restart Nginx
 echo "Restarting Nginx..."
 (sudo systemctl restart nginx > /dev/null 2>&1) & show_spinner $!
-clear
+
 
 # Install Docker
 echo "Installing Docker..."
-# Add Docker's official GPG key
-curl -fsSL https://download.docker.com/linux/$(. /etc/os-release && echo "$ID")/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-
-# Set up the stable repository
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/$(. /etc/os-release && echo "$ID") $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-# Update package index
-sudo apt-get update
-(sudo apt install -y ¨containerd.io docker-compose-plugin docker-ce docker-ce-cli > /dev/null 2>&1 ) & show_spinner $!
+(curl -fsSL get.docker.com | CHANNEL=stable sudo sh
 sudo systemctl enable --now docker
 sleep 2
-clear
+
 
 # Create .env file and generate key
 # Navigate to the Pelican directory and run the command
@@ -456,19 +447,18 @@ php artisan p:environment:setup
 # Setting permissions
 sudo chmod -R 755 storage/* bootstrap/cache/
 sudo chown -R www-data:www-data /var/www/pelican
-clear
+
 
 # Restart Nginx
 echo "Restarting Nginx..."
 (sudo systemctl restart nginx > /dev/null 2>&1) & show_spinner $!
-clear
+
 
 # Installing Wings
 echo "Installing Wings..."
 (sudo mkdir -p /etc/pelican /var/run/wings) > /dev/null 2>&1
 (sudo curl -L -o /usr/local/bin/wings "https://github.com/pelican-dev/wings/releases/latest/download/wings_linux_$([[ "$(uname -m)" == "x86_64" ]] && echo "amd64" || echo "arm64")") > /dev/null 2>&1
 (sudo chmod u+x /usr/local/bin/wings) > /dev/null 2>&1) & show_spinner $!
-clear
 
 # Daemonize Wings
 cat <<EOF | sudo tee /etc/systemd/system/wings.service
