@@ -15,33 +15,6 @@ for arg in "$@"; do
     fi
 done
 
-# Parse command-line arguments and set the corresponding choice
-for ((i = 1; i <= $#; i++)); do
-    case "${!i}" in
-        -d)
-            choice="ssl"
-            ((i++))
-            domain="${!i}"
-            ;;
-        -i)
-            choice="ip"
-            ((i++))
-            ip="${!i}"
-            ;;
-        -w)
-            choice="wings"
-            ;;
-        -u)
-            choice="update"
-            ;;
-        -x)
-            choice="uninstall"
-            ;;
-        *)
-            ;;
-    esac
-done
-
 
 # If the script is not run with the --skip-welcome argument, display the welcome message
 if [ "$SKIP_WELCOME" == false ]; then
@@ -81,8 +54,7 @@ show_spinner() {
     else
         spinstr='|/-\' # ASCII spinner fallback
     fi
-    local colors=("\e[32m" "\e[37m") # Green and White colors
-    local reset="\e[0m"  # Reset color
+    local colors=("\e[32m" ) # Green and White colors
     local color_index=0
 
     while [ "$(ps -p $pid -o pid=)" ]; do
@@ -102,6 +74,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Collect inputs at the beginning
+sudo apt update > /dev/null 2>&1
 sudo apt install -y gpg  > /dev/null 2>&1
 echo -e "\e[32mSSL and Domain\e[0m, \e[33mHTTP and IP\e[0m, \e[34mInstall Wings\e[0m, or \e[35mUpdate Pelican\e[0m \e[31mUninstall Pelican\e[0m"
 read -p "Do you want to use SSL with a domain name, use an IP address via HTTP, install Wings, update Pelican or uninstall Pelican? (ssl/ip/wings/update/uninstall): " choice
@@ -164,18 +137,9 @@ EOF
     exit 0
 elif [ "$choice" == "update" ]; then
     echo -e "\e[35mYou selected to update Pelican.\e[0m"
-    cd /var/www/pelican
-    php artisan down
     echo "Updating Pelican..."
-    (sudo curl -L https://github.com/pelican-dev/panel/releases/latest/download/panel.tar.gz | sudo tar -xzv > /dev/null 2>&1) & show_spinner $!
-    (sudo chmod -R 755 storage/* bootstrap/cache > /dev/null 2>&1) & show_spinner $!
-    (sudo COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader > /dev/null 2>&1) & show_spinner $!
-    (php artisan view:clear && php artisan config:clear > /dev/null 2>&1) & show_spinner $!
-    (php artisan filament:optimize > /dev/null 2>&1) & show_spinner $!
-    (php artisan migrate --seed --force > /dev/null 2>&1) & show_spinner $!
-    (sudo chown -R www-data:www-data /var/www/pelican > /dev/null 2>&1) & show_spinner $!
-    (php artisan queue:restart > /dev/null 2>&1) & show_spinner $!
-    (sudo php artisan up > /dev/null 2>&1) & show_spinner $!
+    (sudo bash -c "$(curl -fsSL https://pelican.dev/updatePanel.sh)") < /dev/null & show_spinner $!
+    clear
     echo -e "\e[32mPelican has been successfully updated.\e[0m"
     exit 0
 elif [ "$choice" == "uninstall" ]; then
@@ -236,28 +200,29 @@ elif [ "$PACKAGE_MANAGER" == "apt-get" ]; then
     (sudo apt-get update > /dev/null 2>&1) & show_spinner $!
     (sudo apt-get install -y php8.4 php8.4-gd php8.4-mysql php8.4-mbstring php8.4-bcmath php8.4-xml php8.4-curl php8.4-zip php8.4-intl php8.4-sqlite3 php8.4-fpm > /dev/null 2>&1) & show_spinner $!
     (sudo apt-get install -y curl git unzip tar > /dev/null 2>&1) & show_spinner $!
+    (sudo apt-get remove -y apache2 > /dev/null 2>&1) & show_spinner $!
     (sudo apt-get install -y nginx > /dev/null 2>&1) & show_spinner $!
 else
     echo "Neither yum nor apt-get found"
     exit 1
 fi
-clear
+
 
 # Create Pelican directory
 echo "Creating Pelican directory..."
 (sudo mkdir -p /var/www/pelican > /dev/null 2>&1) & show_spinner $!
-clear
+
 
 # Install Pelican inside the Pelican directory
 echo "Installing Pelican..."
 (cd /var/www/pelican && curl -L https://github.com/pelican-dev/panel/releases/latest/download/panel.tar.gz | sudo tar -xzv > /dev/null 2>&1) & show_spinner $!
-clear
+
 
 # Install Docker with Docker Compose Plugin
 echo "Installing Composer..."
 (curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer > /dev/null 2>&1) & show_spinner $!
-(cd /var/www/pelican && echo "yes" | sudo composer install --no-dev --optimize-autoloader > /dev/null 2>&1) & show_spinner $!
-clear
+(cd /var/www/pelican && echo "yes" | sudo sudo COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader > /dev/null 2>&1) & show_spinner $!
+
 
 # Check if apache2 is installed and remove it
 echo "Checking and removing Apache2 if installed..."
@@ -477,7 +442,7 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docke
 
 # Update package index
 sudo apt-get update
-(sudo apt install -y docker.io docker-compose-plugin docker-ce docker-ce-cli > /dev/null 2>&1 ) & show_spinner $!
+(sudo apt install -y ¨containerd.io docker-compose-plugin docker-ce docker-ce-cli > /dev/null 2>&1 ) & show_spinner $!
 sudo systemctl enable --now docker
 sleep 2
 clear
@@ -486,7 +451,7 @@ clear
 # Navigate to the Pelican directory and run the command
 cd /var/www/pelican
 php artisan p:environment:setup
-clear
+
 
 # Setting permissions
 sudo chmod -R 755 storage/* bootstrap/cache/
@@ -500,9 +465,9 @@ clear
 
 # Installing Wings
 echo "Installing Wings..."
-sudo mkdir -p /etc/pelican /var/run/wings
-(sudo curl -L -o /usr/local/bin/wings "https://github.com/pelican-dev/wings/releases/latest/download/wings_linux_$([[ "$(uname -m)" == "x86_64" ]] && echo "amd64" || echo "arm64")" > /dev/null 2>&1) & show_spinner $!
-sudo chmod u+x /usr/local/bin/wings
+(sudo mkdir -p /etc/pelican /var/run/wings) > /dev/null 2>&1
+(sudo curl -L -o /usr/local/bin/wings "https://github.com/pelican-dev/wings/releases/latest/download/wings_linux_$([[ "$(uname -m)" == "x86_64" ]] && echo "amd64" || echo "arm64")") > /dev/null 2>&1
+(sudo chmod u+x /usr/local/bin/wings) > /dev/null 2>&1) & show_spinner $!
 clear
 
 # Daemonize Wings
