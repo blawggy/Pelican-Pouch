@@ -3,6 +3,10 @@
 # Ensure script uses UTF-8 encoding
 export LANG=en_US.UTF-8
 
+# Install Dependencies if user doesnt have them installed
+sudo apt install wget curl git tar unzip -y
+
+
 # Clear Console
 clear
 
