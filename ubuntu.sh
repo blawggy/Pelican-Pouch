@@ -25,6 +25,35 @@ warn() { echo -e "\e[33m[!]\e[0m $1"; }
 
 require_root() { [ "$EUID" -eq 0 ] || error_exit "Please run as root (sudo)."; }
 
+# Official Docker installation using repository method
+install_docker() {
+    if command -v docker >/dev/null 2>&1; then
+        info "Docker already installed, skipping."
+        return 0
+    fi
+    
+    info "Installing Docker via official repository"
+    (
+        apt update >/dev/null 2>&1
+        apt install -y ca-certificates curl gnupg lsb-release >/dev/null 2>&1
+        
+        # Add Docker's official GPG key
+        install -m 0755 -d /etc/apt/keyrings
+        if [ ! -f /etc/apt/keyrings/docker.gpg ]; then
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        fi
+        
+        # Set up the repository
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+        
+        apt update >/dev/null 2>&1
+        apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin >/dev/null 2>&1
+    ) & show_spinner $!
+    
+    systemctl enable --now docker
+    okay "Docker installed successfully."
+}
+
 #-------------- Pre-flight --------------#
 require_root
 
@@ -77,9 +106,7 @@ case "$choice" in
     systemctl daemon-reload
     okay "Pelican uninstalled."; exit 0 ;;
   wings)
-    info "Installing Docker"
-    (curl -fsSL https://get.docker.com | CHANNEL=stable bash >/dev/null 2>&1) & show_spinner $!
-    systemctl enable --now docker
+    install_docker
     info "Installing Wings binary"
     mkdir -p /etc/pelican /var/run/wings
     ARCH=$(uname -m); [ "$ARCH" = x86_64 ] && ARCH=amd64 || ARCH=arm64
@@ -253,10 +280,7 @@ nginx -t && systemctl restart nginx
 
 #-------------- Docker & Wings --------------#
 info "Installing Docker & Wings"
-if ! command -v docker >/dev/null 2>&1; then
-  (curl -fsSL https://get.docker.com | CHANNEL=stable bash >/dev/null 2>&1) & show_spinner $!
-  systemctl enable --now docker
-fi
+install_docker
 
 mkdir -p /etc/pelican /var/run/wings
 ARCH=$(uname -m); [ "$ARCH" = x86_64 ] && ARCH=amd64 || ARCH=arm64
