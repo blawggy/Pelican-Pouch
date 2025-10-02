@@ -132,14 +132,8 @@ fi
 
 (apt update >/dev/null 2>&1) & show_spinner $!
 
-PHP_TARGET=8.4
-if ! apt-cache policy php${PHP_TARGET} 2>/dev/null | grep -q Candidate:; then
-  warn "php${PHP_TARGET} not available. Falling back to php8.3"
-  PHP_TARGET=8.3
-fi
-
-PHP_PACKAGES="php${PHP_TARGET} php${PHP_TARGET}-fpm php${PHP_TARGET}-gd php${PHP_TARGET}-mysql php${PHP_TARGET}-mbstring php${PHP_TARGET}-bcmath php${PHP_TARGET}-xml php${PHP_TARGET}-curl php${PHP_TARGET}-zip php${PHP_TARGET}-intl php${PHP_TARGET}-sqlite3"
-info "Installing PHP ${PHP_TARGET} & extensions"
+PHP_PACKAGES="php8.4 php8.4-fpm php8.4-gd php8.4-mysql php8.4-mbstring php8.4-bcmath php8.4-xml php8.4-curl php8.4-zip php8.4-intl php8.4-sqlite3"
+info "Installing PHP 8.4 & extensions"
 (apt install -y $PHP_PACKAGES >/dev/null 2>&1) & show_spinner $!
 
 # Remove Apache if present
