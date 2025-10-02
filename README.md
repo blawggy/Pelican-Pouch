@@ -25,7 +25,7 @@
 ## Pelican Pouch Script
 
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/blawggy/Pelican-Dev-Installer/main/get-dist.sh)
+bash <(curl -s https://pouch.zptc.cc)
 ```
 
 ### Without greeting
