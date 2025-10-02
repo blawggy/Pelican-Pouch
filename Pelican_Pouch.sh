@@ -198,15 +198,17 @@ if [ "$PACKAGE_MANAGER" == "yum" ]; then
     (sudo yum update -y > /dev/null 2>&1) & show_spinner $!
 elif [ "$PACKAGE_MANAGER" == "apt" ]; then
     (sudo apt update > /dev/null 2>&1) & show_spinner $!
-    (sudo apt install -y ca-certificates apt-transport-https software-properties-common wget > /dev/null 2>&1) & show_spinner $!
-    (wget -qO - https://packages.sury.org/php/apt.gpg | sudo tee /etc/apt/trusted.gpg.d/sury-php.gpg > /dev/null 2>&1) & show_spinner $!
-    (echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/sury-php.list > /dev/null 2>&1) & show_spinner $!
+    (sudo apt install -y ca-certificates apt-transport-https software-properties-common wget curl gnupg lsb-release > /dev/null 2>&1) & show_spinner $!
+    # Add Sury PHP repository with proper GPG key handling
+    (curl -fsSL https://packages.sury.org/php/apt.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/sury-php.gpg > /dev/null 2>&1) & show_spinner $!
+    (echo "deb [signed-by=/etc/apt/keyrings/sury-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/sury-php.list > /dev/null 2>&1) & show_spinner $!
+    # Add Ondrej PPA with proper key verification
     (sudo add-apt-repository ppa:ondrej/php -y > /dev/null 2>&1) & show_spinner $!
-    (sudo apt-get update > /dev/null 2>&1) & show_spinner $!
-    (sudo apt-get install -y php8.4 php8.4-gd php8.4-mysql php8.4-mbstring php8.4-bcmath php8.4-xml php8.4-curl php8.4-zip php8.4-intl php8.4-sqlite3 php8.4-fpm > /dev/null 2>&1) & show_spinner $!
-    (sudo apt-get install -y curl git unzip tar > /dev/null 2>&1) & show_spinner $!
-    (sudo apt-get remove -y apache2 > /dev/null 2>&1) & show_spinner $!
-    (sudo apt-get install -y nginx > /dev/null 2>&1) & show_spinner $!
+    (sudo apt update > /dev/null 2>&1) & show_spinner $!
+    (sudo apt install -y php8.4 php8.4-gd php8.4-mysql php8.4-mbstring php8.4-bcmath php8.4-xml php8.4-curl php8.4-zip php8.4-intl php8.4-sqlite3 php8.4-fpm > /dev/null 2>&1) & show_spinner $!
+    (sudo apt install -y curl git unzip tar > /dev/null 2>&1) & show_spinner $!
+    (sudo apt remove -y apache2 > /dev/null 2>&1) & show_spinner $!
+    (sudo apt install -y nginx > /dev/null 2>&1) & show_spinner $!
 else
     echo "Neither yum nor apt-get found"
     exit 1
@@ -233,8 +235,8 @@ echo "Installing Composer..."
 echo "Checking and removing Apache2 if installed..."
 if [ "$PACKAGE_MANAGER" == "yum" ]; then
     (yum list installed "httpd" &> /dev/null && sudo yum remove -y httpd > /dev/null 2>&1) & show_spinner $!
-elif [ "$PACKAGE_MANAGER" == "apt-get" ]; then
-    (dpkg -l | grep -q apache2 && sudo apt-get remove -y apache2 > /dev/null 2>&1) & show_spinner $!
+elif [ "$PACKAGE_MANAGER" == "apt" ]; then
+    (dpkg -l | grep -q apache2 && sudo apt remove -y apache2 > /dev/null 2>&1) & show_spinner $!
 fi
 
 
@@ -368,8 +370,8 @@ EOF
     fi
     if [ "$PACKAGE_MANAGER" == "yum" ]; then
         (sudo yum install -y certbot python3-certbot-nginx > /dev/null 2>&1) & show_spinner $!
-    elif [ "$PACKAGE_MANAGER" == "apt-get" ]; then
-        (sudo apt-get install -y certbot python3-certbot-nginx > /dev/null 2>&1) & show_spinner $!
+    elif [ "$PACKAGE_MANAGER" == "apt" ]; then
+        (sudo apt install -y certbot python3-certbot-nginx > /dev/null 2>&1) & show_spinner $!
     fi
     
 elif [ "$choice" == "ip" ]; then
