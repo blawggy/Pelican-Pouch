@@ -25,7 +25,7 @@
 ## Pelican Pouch Script
 
 ```bash
-bash <(curl -s https://pouch.zptc.cc)
+bash <(curl -sL https://pouch.zptc.cc)
 ```
 
 ### Without greeting
