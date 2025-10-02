@@ -9,7 +9,8 @@ export LANG=en_US.UTF-8
 
 #-------------- Helper Functions --------------#
 show_spinner() {
-    local pid=$1 delay=0.1 spin='|/-\' i=0
+    local pid=$1 delay=0.09 i=0
+    local spin='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
     while kill -0 $pid 2>/dev/null; do
         printf " %s\r" "${spin:i++%${#spin}:1}"
         sleep $delay
@@ -158,9 +159,7 @@ info "Downloading Pelican panel"
 (cd /var/www/pelican && curl -L https://github.com/pelican-dev/panel/releases/latest/download/panel.tar.gz | tar -xz) >/dev/null 2>&1
 
 info "Installing Composer"
-if ! command -v composer >/dev/null 2>&1; then
-  (curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer >/dev/null 2>&1) & show_spinner $!
-fi
+(curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer >/dev/null 2>&1) & show_spinner $!
 
 info "Running composer install (no-dev)"
 (cd /var/www/pelican && COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader -q)
