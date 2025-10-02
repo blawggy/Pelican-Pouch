@@ -159,10 +159,10 @@ info "Downloading Pelican panel"
 (cd /var/www/pelican && curl -L https://github.com/pelican-dev/panel/releases/latest/download/panel.tar.gz | tar -xz) >/dev/null 2>&1
 
 info "Installing Composer"
-(curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer >/dev/null 2>&1) & show_spinner $!
+(curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer >/dev/null 2>&1) & show_spinner $!
 
 info "Running composer install (no-dev)"
-(cd /var/www/pelican && COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader -q)
+(cd /var/www/pelican && echo "yes" | sudo sudo COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader >/dev/null 2>&1) & show_spinner $!
 
 #-------------- Nginx Config --------------#
 info "Configuring Nginx"
