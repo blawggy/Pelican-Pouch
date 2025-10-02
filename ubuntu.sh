@@ -133,8 +133,8 @@ fi
 (apt update >/dev/null 2>&1) & show_spinner $!
 
 PHP_TARGET=8.4
-if ! apt-cache policy php${PHP_TARGET}-fpm 2>/dev/null | grep -q Candidate:; then
-  warn "php${PHP_TARGET}-fpm not available. Falling back to php8.3"
+if ! apt-cache policy php${PHP_TARGET} 2>/dev/null | grep -q Candidate:; then
+  warn "php${PHP_TARGET} not available. Falling back to php8.3"
   PHP_TARGET=8.3
 fi
 
