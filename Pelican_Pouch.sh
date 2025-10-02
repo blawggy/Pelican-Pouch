@@ -4,8 +4,8 @@
 export LANG=en_US.UTF-8
 
 # Install Dependencies if user doesnt have them installed
-sudo apt update
-sudo apt install wget curl git tar unzip lsb-release gnupg2  -y
+(sudo apt update < /dev/null > /dev/null 2>&1)
+(sudo apt install wget curl git tar unzip lsb-release gnupg2  -y < /dev/null > /dev/null 2>&1)
 
 
 # Clear Console
@@ -107,7 +107,7 @@ elif [ "$choice" == "ip" ]; then
 elif [ "$choice" == "wings" ]; then
     echo -e "\e[34mYou selected to install Wings.\e[0m"
     echo "Installing Docker..."
-    apt install -y docker.io docker-compose-plugin docker-ce docker-ce-cli > /dev/null 2>&1
+    curl -fsSL get.docker.com | CHANNEL=stable sudo sh > /dev/null 2>&1
     systemctl start docker
     sudo systemctl enable --now docker
     echo "Installing Wings..."
@@ -438,7 +438,7 @@ echo "Restarting Nginx..."
 
 # Install Docker
 echo "Installing Docker..."
-(curl -fsSL get.docker.com | CHANNEL=stable sudo sh
+curl -fsSL get.docker.com | CHANNEL=stable sudo sh
 sudo systemctl enable --now docker
 sleep 2
 
