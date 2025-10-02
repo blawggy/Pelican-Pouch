@@ -134,7 +134,7 @@ fi
 PHP_TARGET=8.4
 PHP_PACKAGES="php8.4 php8.4-fpm php8.4-gd php8.4-mysql php8.4-mbstring php8.4-bcmath php8.4-xml php8.4-curl php8.4-zip php8.4-intl php8.4-sqlite3"
 info "Installing PHP 8.4 & extensions"
-(apt install -y $PHP_PACKAGES >/dev/null 2>&1) & show_spinner $!
+(apt install -y php8.4 php8.4-fpm php8.4-gd php8.4-mysql php8.4-mbstring php8.4-bcmath php8.4-xml php8.4-curl php8.4-zip php8.4-intl php8.4-sqlite3 >/dev/null 2>&1) & show_spinner $!
 
 # Remove Apache if present
 if dpkg -l | grep -q apache2; then
