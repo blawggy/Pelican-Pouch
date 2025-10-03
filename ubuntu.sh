@@ -147,15 +147,6 @@ info "Setting up PHP repositories"
 # Primary: Ondrej PPA (contains multiple PHP versions). Ubuntu 24.04 may not yet have 8.4 GA—fallback logic below.
 add-apt-repository -y ppa:ondrej/php >/dev/null 2>&1 || warn "Could not add Ondrej PPA"
 
-# Optional Sury (if you want to keep parity) - only if key not already added
-if [ ! -f /etc/apt/keyrings/sury-php.gpg ]; then
-  mkdir -p /etc/apt/keyrings
-  if curl -fsSL https://packages.sury.org/php/apt.gpg | gpg --dearmor -o /etc/apt/keyrings/sury-php.gpg; then
-     echo "deb [signed-by=/etc/apt/keyrings/sury-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" >/etc/apt/sources.list.d/sury-php.list
-  else
-     warn "Skipping Sury repository (key fetch failed)"
-  fi
-fi
 
 (apt update >/dev/null 2>&1) & show_spinner $!
 PHP_TARGET=8.4
