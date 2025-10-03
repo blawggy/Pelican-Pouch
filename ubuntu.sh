@@ -9,13 +9,55 @@ export LANG=en_US.UTF-8
 
 #-------------- Helper Functions --------------#
 show_spinner() {
-    local pid=$1 delay=0.09 i=0
-    local spin='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
-    while kill -0 $pid 2>/dev/null; do
-        printf " %s\r" "${spin:i++%${#spin}:1}"
-        sleep $delay
-    done
-    printf "    \r"
+  local pid=$1 delay=0.09 i=0
+  local spin='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+  while kill -0 $pid 2>/dev/null; do
+    printf " %s\r" "${spin:i++%${#spin}:1}"
+    sleep $delay
+  done
+  
+  # Check exit status and display appropriate result
+  if wait $pid; then
+    printf " \e[32m✓\e[0m\n"
+  else
+    printf " \e[31m✗\e[0m\n"
+  fi
+}
+spinner_ok() {
+  local pid=$1 delay=0.09 i=0
+  local spin='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+  while kill -0 $pid 2>/dev/null; do
+    printf " %s\r" "${spin:i++%${#spin}:1}"
+    sleep $delay
+  done
+  printf " \e[32m✓\e[0m\n"
+}
+spinner_fail() {
+  local pid=$1 delay=0.09 i=0
+  local spin='⠋⠙⠹⠸⼴⠦⠧⠇⠏'
+  while kill -0 $pid 2>/dev/null; do
+    printf " %s\r" "${spin:i++%${#spin}:1}"
+    sleep $delay
+  done
+  printf " \e[31m✗\e[0m\n"
+}
+run_with_spinner() {
+  local cmd="$1"
+  local success_msg="$2"
+  local error_msg="$3"
+  
+  eval "$cmd" >/dev/null 2>&1 &
+  local pid=$!
+  
+  if wait $pid; then
+    spinner_ok $pid
+    [ -n "$success_msg" ] && okay "$success_msg"
+    return 0
+  else
+    spinner_fail $pid
+    [ -n "$error_msg" ] && error_exit "$error_msg"
+    return 1
+  fi
 }
 
 error_exit() { echo -e "\e[31m[ERROR]\e[0m $1" >&2; exit 1; }
@@ -35,10 +77,10 @@ install_docker() {
     info "Installing Docker via official repository"
     
     # Add Docker's official GPG key:
-    apt-get update -y 
-    apt-get install -y ca-certificates curl 
+    (apt-get update -y >/dev/null 2>&1) & show_spinner $!
+    (apt-get install -y ca-certificates curl >/dev/null 2>&1) & show_spinner $!
     install -m 0755 -d /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    (curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc >/dev/null 2>&1) & show_spinner $!
     chmod a+r /etc/apt/keyrings/docker.asc
 
     # Add the repository to Apt sources:
@@ -47,8 +89,8 @@ install_docker() {
       $(. /etc/os-release && echo "${VERSION_CODENAME}") stable" | \
       tee /etc/apt/sources.list.d/docker.list > /dev/null
     
-    apt-get update -y 
-    apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    (apt-get update -y >/dev/null 2>&1) & show_spinner $!
+    (apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin >/dev/null 2>&1) & show_spinner $!
     
     systemctl enable --now docker
     okay "Docker installed successfully."
@@ -313,8 +355,9 @@ chmod -R 755 /var/www/pelican/bootstrap/cache
 
 # Cron & queue
 info "Configuring queue & scheduler"
-(crontab -l -u www-data 2>/dev/null; echo "* * * * * php /var/www/pelican/artisan schedule:run >/dev/null 2>&1") | crontab -u www-data -
-echo -e "pelican-queue\nwww-data\nwww-data" | php artisan p:environment:queue-service || warn "Queue service setup failed"
+cd /var/www/pelican || error_exit "/var/www/pelican missing"
+(crontab -l -u www-data 2>/dev/null; echo "* * * * * php /var/www/pelican/artisan schedule:run >> /dev/null 2>&1") | crontab -u www-data -
+echo -e "pelican-queue\nwww-data\nwww-data" | sudo php /var/www/pelican/artisan p:environment:queue-service
 
 clear
 okay "Pelican installation complete."
