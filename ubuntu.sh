@@ -36,16 +36,18 @@ install_docker() {
     (
         apt update >/dev/null 2>&1
         apt install -y ca-certificates curl gnupg lsb-release >/dev/null 2>&1
-        
-        # Add Docker's official GPG key
-        install -m 0755 -d /etc/apt/keyrings
-        if [ ! -f /etc/apt/keyrings/docker.gpg ]; then
-            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-        fi
-        
-        # Set up the repository
-        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-        
+        # Add Docker's official GPG key:
+        sudo apt-get update >/dev/null 2>&1
+        sudo install -m 0755 -d /etc/apt/keyrings >/dev/null 2>&1
+        sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc >/dev/null 2>&1
+        sudo chmod a+r /etc/apt/keyrings/docker.asc >/dev/null 2>&1
+
+        # Add the repository to Apt sources:
+        echo \
+          "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+          $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+          sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        sudo apt-get update >/dev/null 2>&1
         apt update >/dev/null 2>&1
         apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin >/dev/null 2>&1
     ) & show_spinner $!
