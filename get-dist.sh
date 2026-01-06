@@ -5,37 +5,58 @@ set -euo pipefail
 
 run_distro_script() {
     local dist=""
+    local version=""
+    
     # Detect distro
-    for f in /etc/os-release /etc/lsb-release /etc/redhat-release /etc/debian_version; do
-        [[ -e "$f" ]] || continue
-        case "$f" in
-            /etc/os-release)
-                # shellcheck disable=SC1091
-                . /etc/os-release 2>/dev/null
-                dist="${ID:-${NAME:-}}"
-                ;;
-            /etc/lsb-release)
-                # shellcheck disable=SC1091
-                . /etc/lsb-release 2>/dev/null
-                dist="${DISTRIB_ID:-}"
-                ;;
-            /etc/redhat-release)
-                dist=$(sed 's/ release.*//' /etc/redhat-release | tr '[:upper:]' '[:lower:]')
-                ;;
-            /etc/debian_version)
-                dist="debian"
-                ;;
-        esac
-        [[ -n "$dist" ]] && break
-    done
+    if [[ -e /etc/os-release ]]; then
+        # shellcheck disable=SC1091
+        . /etc/os-release 2>/dev/null
+        dist="${ID:-}"
+        version="${VERSION_ID:-}"
+    elif [[ -e /etc/lsb-release ]]; then
+        # shellcheck disable=SC1091
+        . /etc/lsb-release 2>/dev/null
+        dist="${DISTRIB_ID:-}"
+        version="${DISTRIB_RELEASE:-}"
+    elif [[ -e /etc/redhat-release ]]; then
+        dist=$(sed 's/ release.*//' /etc/redhat-release | tr '[:upper:]' '[:lower:]')
+        version=$(grep -oP '(?<=release )[0-9]+' /etc/redhat-release 2>/dev/null || echo "")
+    elif [[ -e /etc/debian_version ]]; then
+        dist="debian"
+        version=$(cat /etc/debian_version | cut -d. -f1)
+    fi
 
     dist=${dist:-unknown}
-    # Normalize: lowercase, strip after first non-alnum
+    # Normalize: lowercase, strip spaces and special chars
     dist=$(printf '%s' "$dist" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9].*$//')
+    
+    # Map distro names to standardized names
+    case "$dist" in
+        almalinux|alma) dist="almalinux" ;;
+        rocky|rockylinux) dist="rocky" ;;
+        centos|centosstream) dist="centos" ;;
+        ubuntu) dist="ubuntu" ;;
+        debian) dist="debian" ;;
+    esac
 
     local url="https://raw.githubusercontent.com/blawggy/Pelican-Dev-Installer/main/${dist}.sh"
 
-    echo "Detected distro: $dist"
+    echo "Detected distro: $dist${version:+ $version}"
+    
+    # Warn about limited support versions
+    case "$dist" in
+        almalinux|rocky)
+            if [[ "$version" == "8" ]] || [[ "$version" == "9" ]]; then
+                echo "Warning: $dist $version has no SQLite support" >&2
+            fi
+            ;;
+        debian)
+            if [[ "$version" == "11" ]]; then
+                echo "Warning: Debian 11 has no SQLite support" >&2
+            fi
+            ;;
+    esac
+    
     echo "Fetching: $url"
 
     if ! command -v curl >/dev/null 2>&1; then
